@@ -1,0 +1,15 @@
+{
+  "name": "ecommerce-backend",
+  "version": "1.0.0",
+  "description": "back end for my ecommerce app",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Samual Halder",
+  "license": "ISC",
+  "dependencies": {
+    "express": "^4.18.2",
+    "mongoose": "^8.1.3"
+  }
+}
