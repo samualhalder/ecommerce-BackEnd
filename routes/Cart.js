@@ -2,15 +2,16 @@ const express = require("express");
 const {
   addToCart,
   fetchCartByUser,
+  deleteFromCart,
   updateCart,
-  deleteCart,
 } = require("../controller/Cart");
 
 const router = express.Router();
-
+//  /products is already added in base path
 router
   .post("/", addToCart)
   .get("/", fetchCartByUser)
-  .patch("/:id", updateCart)
-  .delete("/:id", deleteCart);
+  .delete("/:id", deleteFromCart)
+  .patch("/:id", updateCart);
+
 exports.router = router;
