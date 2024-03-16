@@ -1,8 +1,9 @@
-const { User } = require('../model/User');
-const crypto = require('crypto');
-const { sanitizeUser } = require('../services/common');
-const SECRET_KEY = 'SECRET_KEY';
-const jwt = require('jsonwebtoken');
+const { User } = require("../model/User");
+const crypto = require("crypto");
+const { sanitizeUser } = require("../services/common");
+const SECRET_KEY = "SECRET_KEY";
+const jwt = require("jsonwebtoken");
+const { use } = require("passport");
 
 exports.createUser = async (req, res) => {
   try {
@@ -12,7 +13,7 @@ exports.createUser = async (req, res) => {
       salt,
       310000,
       32,
-      'sha256',
+      "sha256",
       async function (err, hashedPassword) {
         const user = new User({ ...req.body, password: hashedPassword, salt });
         const doc = await user.save();
@@ -22,14 +23,17 @@ exports.createUser = async (req, res) => {
           if (err) {
             res.status(400).json(err);
           } else {
-            const token = jwt.sign(sanitizeUser(doc), SECRET_KEY);
+            const token = jwt.sign(
+              sanitizeUser(doc),
+              process.env.JWT_SECRETKEY
+            );
             res
-              .cookie('jwt', token, {
+              .cookie("jwt", token, {
                 expires: new Date(Date.now() + 3600000),
                 httpOnly: true,
               })
               .status(201)
-              .json(token);
+              .json({ id: doc.id, role: doc.role });
           }
         });
       }
@@ -40,15 +44,20 @@ exports.createUser = async (req, res) => {
 };
 
 exports.loginUser = async (req, res) => {
+  const user = req;
   res
-    .cookie('jwt', req.user.token, {
+    .cookie("jwt", user.token, {
       expires: new Date(Date.now() + 3600000),
       httpOnly: true,
     })
     .status(201)
-    .json(req.user.token);
+    .json({ id: user.id, role: user.role });
 };
 
-exports.checkUser = async (req, res) => {
-  res.json({ status: 'success', user: req.user });
+exports.checkAuth = async (req, res) => {
+  if (req.user) {
+    res.json(req.user);
+  } else {
+    res.sendStatus(401);
+  }
 };
