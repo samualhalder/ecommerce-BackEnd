@@ -14,7 +14,7 @@ exports.cookieExtractor = function (req) {
     token = req.cookies["jwt"];
   }
   //TODO : this is temporary token for testing without cookie
-  token =
-    "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY1ZWU5MjcwZGQ3Yjg5OWUxMmYwM2VlZiIsInJvbGUiOiJhZG1pbiIsImlhdCI6MTcxMDEzNDAzNn0.ScG0VwWuIw19aV_d-G-IHQPe056yNcQGijoJIrccP9o";
+  // token =
+  //   "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY1ZjcwYjY5MWYyNDJlYmE4MjY4NzFhZiIsInJvbGUiOiJ1c2VyIiwiaWF0IjoxNzEwNjg5MTI5fQ.1AIYs8XctqaEPPRi2beHnlghPXjxhg-dUofGguKiOcI";
   return token;
 };

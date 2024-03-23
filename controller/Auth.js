@@ -3,7 +3,6 @@ const crypto = require("crypto");
 const { sanitizeUser } = require("../services/common");
 const SECRET_KEY = "SECRET_KEY";
 const jwt = require("jsonwebtoken");
-const { use } = require("passport");
 
 exports.createUser = async (req, res) => {
   try {
@@ -44,7 +43,7 @@ exports.createUser = async (req, res) => {
 };
 
 exports.loginUser = async (req, res) => {
-  const user = req;
+  const user = req.user;
   res
     .cookie("jwt", user.token, {
       expires: new Date(Date.now() + 3600000),

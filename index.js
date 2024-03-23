@@ -21,8 +21,11 @@ const cartRouter = require("./routes/Cart");
 const ordersRouter = require("./routes/Order");
 const { User } = require("./model/User");
 const { isAuth, sanitizeUser, cookieExtractor } = require("./services/common");
+const path = require("path");
 
-//WebHoocks
+// Webhook
+
+// TODO: we will capture actual order after deploying out server live on public URL
 
 const endpointSecret = process.env.ENDPOINTSECRET;
 
@@ -45,6 +48,7 @@ server.post(
     switch (event.type) {
       case "payment_intent.succeeded":
         const paymentIntentSucceeded = event.data.object;
+        console.log({ paymentIntentSucceeded });
         // Then define and call a function to handle the event payment_intent.succeeded
         break;
       // ... handle other event types
@@ -64,7 +68,9 @@ opts.jwtFromRequest = cookieExtractor;
 opts.secretOrKey = process.env.JWT_SECRETKEY; // TODO: should not be in code;
 
 //middlewares
-server.use(express.static("build"));
+
+server.use(express.static(path.resolve(__dirname, "build")));
+
 server.use(cookieParser());
 server.use(
   session({
@@ -73,22 +79,22 @@ server.use(
     saveUninitialized: false, // don't create session until something stored
   })
 );
-// server.use(passport.authenticate("session"));
+server.use(passport.authenticate("session"));
 server.use(
   cors({
     exposedHeaders: ["X-Total-Count"],
   })
 );
+// server.use(express.raw({ type: "application/json" }));
 server.use(express.json()); // to parse req.body
-server.use(express.raw({ type: "*/*" }));
-server.use("/products", isAuth(), productsRouter.router);
+server.use("/products", productsRouter.router);
 // we can also use JWT token for client-only auth
-server.use("/categories", isAuth(), categoriesRouter.router);
-server.use("/brands", isAuth(), brandsRouter.router);
-server.use("/users", isAuth(), usersRouter.router);
+server.use("/categories", categoriesRouter.router);
+server.use("/brands", brandsRouter.router);
+server.use("/users", usersRouter.router);
 server.use("/auth", authRouter.router);
-server.use("/cart", isAuth(), cartRouter.router);
-server.use("/orders", isAuth(), ordersRouter.router);
+server.use("/cart", cartRouter.router);
+server.use("/orders", ordersRouter.router);
 
 // Passport Strategies
 passport.use(
@@ -159,7 +165,7 @@ passport.deserializeUser(function (user, cb) {
   });
 });
 
-//Paymant
+// Payments
 
 // This is your test secret API key.
 const stripe = require("stripe")(process.env.STRIPE_SECRETKEY);
@@ -169,9 +175,8 @@ server.post("/create-payment-intent", async (req, res) => {
 
   // Create a PaymentIntent with the order amount and currency
   const paymentIntent = await stripe.paymentIntents.create({
-    amount: totalAmount * 100,
+    amount: totalAmount * 100, // for decimal compensation
     currency: "inr",
-    // In the latest version of the API, specifying the `automatic_payment_methods` parameter is optional because Stripe enables its functionality by default.
     automatic_payment_methods: {
       enabled: true,
     },
